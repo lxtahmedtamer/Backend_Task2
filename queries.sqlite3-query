@@ -1,0 +1,7 @@
+-- database: ./test.db
+
+-- Use the ▷ button in the top right corner to run the entire file.
+
+SELECT * FROM users;
+-- insert_user.sql
+INSERT INTO users (name, email) VALUES ('John Doe', 'john.doe@example.com');
