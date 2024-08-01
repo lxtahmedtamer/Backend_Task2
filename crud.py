@@ -1,37 +1,35 @@
 from sqlalchemy.orm import Session
 from models import User
+from schemas import UserCreate, UserUpdate
 
-# Read user by ID
 def get_user(db: Session, user_id: int):
     return db.query(User).filter(User.id == user_id).first()
 
-# Create a new user
-def create_user(db: Session, user: User):
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
+def get_user_by_email(db: Session, email: str):
+    return db.query(User).filter(User.email == email).first()
 
-# Read all users
-def get_users(db: Session, skip: int = 0, limit: int = 10):
+def get_users(db: Session, skip: int = 0, limit: int = 3):
     return db.query(User).offset(skip).limit(limit).all()
 
-# Update user by ID
-def update_user(db: Session, user_id: int, user_update: dict):
-    user = db.query(User).filter(User.id == user_id).first()
-    if user:
-        for key, value in user_update.items():
-            setattr(user, key, value)
-        db.commit()
-        db.refresh(user)
-        return user
-    return None
+def create_user(db: Session, user: UserCreate):
+    db_user = User(name=user.name, email=user.email)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
 
-# Delete user by ID
-def delete_user(db: Session, user_id: int):
-    user = db.query(User).filter(User.id == user_id).first()
-    if user:
-        db.delete(user)
+def update_user(db: Session, user_id: int, user_update: UserUpdate):
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if db_user:
+        for key, value in user_update.dict(exclude_unset=True).items():
+            setattr(db_user, key, value)
         db.commit()
-        return user
-    return None
+        db.refresh(db_user)
+    return db_user
+
+def delete_user(db: Session, user_id: int):
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if db_user:
+        db.delete(db_user)
+        db.commit()
+    return db_user
